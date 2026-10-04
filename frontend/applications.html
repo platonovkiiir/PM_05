@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Мои заявки</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="nav">
+            <a href="create_application.html">Создать заявку</a>
+            <a href="#" onclick="logout()">Выход</a>
+        </div>
+        <h2>Мои заявки на ремонт</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Услуга</th>
+                    <th>Модель авто</th>
+                    <th>VIN</th>
+                    <th>Дата</th>
+                    <th>Оплата</th>
+                    <th>Статус</th>
+                </tr>
+            </thead>
+            <tbody id="appsTable"></tbody>
+        </table>
+    </div>
+
+    <script>
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+        }
+
+        async function loadApps() {
+            const token = localStorage.getItem('token');
+            if (!token) window.location.href = 'login.html';
+
+            const res = await fetch('http://127.0.0.1:5000/api/applications/my', {
+                headers: {'Authorization': token}
+            });
+            
+            if (res.ok) {
+                const apps = await res.json();
+                const tbody = document.getElementById('appsTable');
+                apps.forEach(app => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${app.service_type}</td>
+                            <td>${app.car_model}</td>
+                            <td>${app.vin}</td>
+                            <td>${app.start_date}</td>
+                            <td>${app.payment_method}</td>
+                            <td><b>${app.status}</b></td>
+                        </tr>
+                    `;
+                });
+            }
+        }
+        loadApps();
+    </script>
+</body>
+</html>

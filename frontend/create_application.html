@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Создание заявки</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="nav"><a href="applications.html">Назад к заявкам</a></div>
+        <h2>Новая заявка на ремонт</h2>
+        <form id="appForm">
+            <input type="text" id="service_type" placeholder="Вид ремонта/услуги" required>
+            <input type="text" id="car_model" placeholder="Модель автомобиля (до 100 симв.)" required maxlength="100">
+            <input type="text" id="vin" placeholder="VIN номер (17 символов)" required minlength="17" maxlength="17">
+            <input type="date" id="start_date" required>
+            <select id="payment_method_id" required>
+                <option value="1">Наличные</option>
+                <option value="2">Банковская карта</option>
+                <option value="3">СБП</option>
+            </select>
+            <button type="submit">Отправить заявку</button>
+        </form>
+        <p id="errorMsg" class="error"></p>
+    </div>
+
+    <script>
+        document.getElementById('appForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = localStorage.getItem('token');
+            
+            const data = {
+                service_type: document.getElementById('service_type').value,
+                car_model: document.getElementById('car_model').value,
+                vin: document.getElementById('vin').value,
+                start_date: document.getElementById('start_date').value,
+                payment_method_id: document.getElementById('payment_method_id').value
+            };
+            
+            const res = await fetch('http://127.0.0.1:5000/api/applications', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': token
+                },
+                body: JSON.stringify(data)
+            });
+            
+            const result = await res.json();
+            if (res.ok) {
+                alert('Заявка успешно создана!');
+                window.location.href = 'applications.html';
+            } else {
+                document.getElementById('errorMsg').innerText = result.error;
+            }
+        });
+    </script>
+</body>
+</html>
