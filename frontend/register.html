@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Регистрация</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Регистрация</h2>
+        <form id="regForm">
+            <input type="text" id="login" placeholder="Логин (только латиница и цифры, от 6 симв.)" required pattern="[a-zA-Z0-9]{6,}">
+            <input type="password" id="password" placeholder="Пароль (от 8 симв.)" required minlength="8">
+            <input type="text" id="full_name" placeholder="ФИО (только кириллица)" required pattern="^[А-Яа-яЁё\s]+$">
+            <input type="text" id="phone" placeholder="Телефон 8(XXX)XXX-XX-XX" required pattern="^8\(\d{3}\)\d{3}-\d{2}-\d{2}$">
+            <input type="email" id="email" placeholder="Email" required>
+            <button type="submit">Зарегистрироваться</button>
+        </form>
+        <p id="errorMsg" class="error"></p>
+        <p>Уже есть аккаунт? <a href="login.html">Войти</a></p>
+    </div>
+
+    <script>
+        document.getElementById('regForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                login: document.getElementById('login').value,
+                password: document.getElementById('password').value,
+                full_name: document.getElementById('full_name').value,
+                phone: document.getElementById('phone').value,
+                email: document.getElementById('email').value
+            };
+            
+            const res = await fetch('http://127.0.0.1:5000/api/register', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            
+            const result = await res.json();
+            if (res.ok) {
+                alert('Успешно! Теперь войдите.');
+                window.location.href = 'login.html';
+            } else {
+                document.getElementById('errorMsg').innerText = result.error;
+            }
+        });
+    </script>
+</body>
+</html>

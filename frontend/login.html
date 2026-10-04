@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Авторизация</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Вход в систему</h2>
+        <form id="loginForm">
+            <input type="text" id="login" placeholder="Логин" required>
+            <input type="password" id="password" placeholder="Пароль" required>
+            <button type="submit">Войти</button>
+        </form>
+        <p id="errorMsg" class="error"></p>
+        <p>Нет аккаунта? <a href="register.html">Зарегистрироваться</a></p>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                login: document.getElementById('login').value,
+                password: document.getElementById('password').value
+            };
+            
+            const res = await fetch('http://127.0.0.1:5000/api/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            
+            const result = await res.json();
+            if (res.ok) {
+                localStorage.setItem('token', result.token);
+                if (result.role_id === 3) window.location.href = 'admin.html';
+                else window.location.href = 'applications.html';
+            } else {
+                document.getElementById('errorMsg').innerText = result.error;
+            }
+        });
+    </script>
+</body>
+</html>
