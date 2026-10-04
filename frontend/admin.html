@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Панель администратора</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="nav"><a href="#" onclick="logout()">Выход</a></div>
+        <h2>Управление заявками</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Клиент</th>
+                    <th>Услуга</th>
+                    <th>Авто (VIN)</th>
+                    <th>Дата</th>
+                    <th>Статус</th>
+                    <th>Действие</th>
+                </tr>
+            </thead>
+            <tbody id="adminTable"></tbody>
+        </table>
+    </div>
+
+    <script>
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+        }
+
+        async function loadAdminApps() {
+            const token = localStorage.getItem('token');
+            const res = await fetch('http://127.0.0.1:5000/api/admin/applications', {
+                headers: {'Authorization': token}
+            });
+            
+            if (res.ok) {
+                const apps = await res.json();
+                const tbody = document.getElementById('adminTable');
+                tbody.innerHTML = '';
+                apps.forEach(app => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${app.id}</td>
+                            <td>${app.full_name}</td>
+                            <td>${app.service_type}</td>
+                            <td>${app.car_model} <br><small>${app.vin}</small></td>
+                            <td>${app.start_date}</td>
+                            <td>${app.status}</td>
+                            <td>
+                                <select onchange="changeStatus(${app.id}, this.value)">
+                                    <option value="1" ${app.status_id === 1 ? 'selected' : ''}>Новая</option>
+                                    <option value="2" ${app.status_id === 2 ? 'selected' : ''}>В работе</option>
+                                    <option value="3" ${app.status_id === 3 ? 'selected' : ''}>Ремонт завершен</option>
+                                </select>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } else {
+                alert('Доступ запрещен');
+                window.location.href = 'login.html';
+            }
+        }
+
+        async function changeStatus(id, newStatusId) {
+            const token = localStorage.getItem('token');
+            await fetch(`http://127.0.0.1:5000/api/admin/applications/${id}/status`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': token
+                },
+                body: JSON.stringify({status_id: newStatusId})
+            });
+            loadAdminApps();
+        }
+
+        loadAdminApps();
+    </script>
+</body>
+</html>
